@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobGuard | Vigilante Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a2e; color: #fff; display: flex; flex-direction: column; align-items: center; padding-top: 50px; margin: 0; }
+        .container { display: flex; gap: 20px; }
+        .card { background: #16213e; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 400px; text-align: center; border: 1px solid #0f3460; }
+        h1 { color: #e94560; margin-bottom: 20px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #0f3460; background: #0f3460; color: white; border-radius: 6px; font-size: 16px; }
+        button { width: 100%; padding: 12px; background-color: #e94560; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 10px; font-weight: bold; }
+        button:hover { background-color: #c0354a; }
+        .secondary-btn { background-color: #0f3460; }
+        #result { margin-top: 20px; font-weight: bold; padding: 15px; border-radius: 6px; display: none; }
+        .success { background-color: #007a5e; color: white; }
+        .error { background-color: #d93025; color: white; }
+        
+        /* The Live Feed Section */
+        .feed { width: 300px; background: #16213e; padding: 20px; border-radius: 12px; border: 1px solid #0f3460; }
+        .feed h3 { color: #e94560; border-bottom: 1px solid #0f3460; padding-bottom: 10px; }
+        .scam-item { background: #0f3460; padding: 10px; margin-bottom: 8px; border-radius: 4px; font-size: 13px; color: #ccc; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>🛡️ JobGuard</h1>
+            <p style="color: #888; font-size: 14px;">Verify & Report Recruitment Fraud</p>
+            
+            <input type="text" id="company" placeholder="Company Name (e.g., Oracle)" value="Oracle">
+            <input type="email" id="email" placeholder="Recruiter Email">
+            
+            <button onclick="verifyEmail()">🔍 SCAN ID</button>
+            <button class="secondary-btn" onclick="reportScam()">🚨 REPORT AS SCAM</button>
+
+            <div id="result"></div>
+        </div>
+
+        <div class="feed">
+            <h3>🔴 LIVE BLACKLIST</h3>
+            <div id="scamList">
+                <div style="color: #666;">Loading recent reports...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Verify Logic
+        async function verifyEmail() {
+            const company = document.getElementById('company').value;
+            const email = document.getElementById('email').value;
+            const resultBox = document.getElementById('result');
+
+            const response = await fetch(`/api/security/verify?company=${company}&email=${email}`);
+            const text = await response.text();
+
+            resultBox.style.display = 'block';
+            if (text.includes("✅")) {
+                resultBox.className = 'success';
+                resultBox.innerHTML = text;
+            } else {
+                resultBox.className = 'error';
+                resultBox.innerHTML = text;
+            }
+        }
+
+        // 2. Report Logic
+        async function reportScam() {
+            const email = document.getElementById('email').value;
+            await fetch(`/api/security/report?email=${email}`, { method: 'POST' });
+            alert("🚨 SCAM REPORTED! Thanks for protecting the community.");
+            loadRecentScams(); // Refresh the list
+        }
+
+        // 3. Live Feed Logic
+        async function loadRecentScams() {
+            const response = await fetch('/api/security/recent');
+            const scams = await response.json();
+            const list = document.getElementById('scamList');
+            list.innerHTML = ""; // Clear list
+            
+            scams.forEach(scam => {
+                const item = document.createElement('div');
+                item.className = 'scam-item';
+                item.innerHTML = `⚠️ <b>${scam.scammerEmail}</b><br><small>Reported just now</small>`;
+                list.appendChild(item);
+            });
+        }
+
+        // Load feed on startup
+        loadRecentScams();
+    </script>
+
+</body>
+</html>
