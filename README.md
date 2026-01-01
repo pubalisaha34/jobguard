@@ -2,7 +2,7 @@
 
 **Recruitment scams are annoying. I built a backend to stop them.**
 
-JobGuard is a security engine that verifies if a recruiter is actually from the company they claim to be. If someone emails you from "Oracle" but uses a Gmail address, this system flags it instantly.
+JobGuard is a security engine that verifies if a recruiter is actually from the company they claim to be. If someone emails you from a company but uses a Gmail address instead of a company domain adress, this system flags it instantly.
 
 It also features a **"Vigilante Mode"** users can report scammers to a live blacklist database so the community stays protected.
 
